@@ -1,0 +1,47 @@
+[package]
+name = "octopus-core"
+version = "0.1.0"
+description = "Storage, providers and agent logic for Octopus Chat. Deliberately free of any Tauri dependency so it can be unit tested without a webview."
+license = "MIT"
+authors = ["Octopus Chat"]
+edition = "2024"
+rust-version = "1.85"
+
+[lib]
+name = "octopus_core"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "process", "io-util"] }
+futures-util = "0.3"
+reqwest = { version = "0.12", default-features = false, features = [
+  "json",
+  "stream",
+  "rustls-tls",
+  "gzip",
+  "brotli",
+  "charset",
+  "http2",
+] }
+
+rusqlite = { version = "0.37", features = ["bundled"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std", "serde"] }
+dirs = "6"
+rand = "0.9"
+similar = "2"
+ignore = "0.4"
+globset = "0.4"
+regex = "1"
+cron = "0.15"
+url = "2"
+percent-encoding = "2"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "fs", "process", "io-util", "test-util", "net"] }
+# Scratch directories for the integration tests.
+tempdir = "0.3"

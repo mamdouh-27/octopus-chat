@@ -1,0 +1,66 @@
+[package]
+name = "octopus-chat"
+version = "0.1.0"
+description = "Octopus Chat - local-first AI agent desktop app"
+license = "MIT"
+authors = ["Octopus Chat"]
+edition = "2024"
+rust-version = "1.85"
+
+# The app is the binary only; all logic lives in the tauri-free core crate so it
+# can be unit tested without loading a webview.
+[lib]
+name = "octopus_chat_lib"
+crate-type = ["rlib"]
+
+[workspace]
+members = ["core"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+octopus-core = { path = "core" }
+
+# Pinned to the exact versions of the matching `@tauri-apps/plugin-*` npm
+# packages: Tauri refuses to build when the JS and Rust sides drift apart.
+tauri = { version = "2.12.1", features = [] }
+tauri-plugin-opener = "=2.7.0"
+tauri-plugin-dialog = "=2.8.1"
+tauri-plugin-fs = "=2.6.0"
+tauri-plugin-os = "=2.4.0"
+tauri-plugin-notification = "=2.5.1"
+tauri-plugin-process = "2"
+tauri-plugin-window-state = "=2.5.0"
+tauri-plugin-single-instance = "2"
+
+# Used directly (not through tauri-plugin-dialog) so the folder picker does not
+# depend on the webview capability system. rfd is already in the lock file as a
+# transitive dependency of the dialog plugin, so this adds no new download.
+rfd = "0.16"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+# Only used to hold the shared connection pool; all request building happens in
+# the core crate.
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
+# Dev builds skip debug info: it roughly halves rustc's memory use, which matters
+# on machines with a constrained pagefile. Release keeps symbols out of the
+# shipped binary entirely.
+[profile.dev]
+debug = 0
+incremental = true
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
+incremental = false

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#7c8cff"/>
+      <stop offset="1" stop-color="#b57bff"/>
+    </linearGradient>
+    <linearGradient id="tentacle" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8f7bf0"/>
+      <stop offset="1" stop-color="#6a5cd8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Tentacles: eight tapered arms curling outward from the mantle. -->
+  <g fill="url(#tentacle)">
+    <path d="M150 300 C112 322 92 360 100 400 C104 424 126 434 140 418 C152 404 142 384 140 366 C138 340 156 322 176 316 Z"/>
+    <path d="M196 322 C170 356 160 400 178 436 C188 458 216 462 224 440 C230 422 212 406 210 384 C208 356 224 336 240 326 Z"/>
+    <path d="M362 300 C400 322 420 360 412 400 C408 424 386 434 372 418 C360 404 370 384 372 366 C374 340 356 322 336 316 Z"/>
+    <path d="M316 322 C342 356 352 400 334 436 C324 458 296 462 288 440 C282 422 300 406 302 384 C304 356 288 336 272 326 Z"/>
+    <path d="M228 330 C206 372 200 420 216 458 C224 480 250 486 260 466 C268 448 252 432 252 408 C252 376 262 350 274 332 Z"/>
+    <path d="M284 330 C306 372 312 420 296 458 C288 480 262 486 252 466 C244 448 260 432 260 408 C260 376 250 350 238 332 Z"/>
+  </g>
+
+  <!-- Mantle: the rounded head. -->
+  <path fill="url(#body)" d="M256 84 C338 84 396 148 396 226 C396 292 348 340 256 340 C164 340 116 292 116 226 C116 148 174 84 256 84 Z"/>
+
+  <!-- Eyes -->
+  <circle cx="206" cy="212" r="30" fill="#0d1017"/>
+  <circle cx="306" cy="212" r="30" fill="#0d1017"/>
+  <circle cx="214" cy="203" r="11" fill="#ffffff"/>
+  <circle cx="314" cy="203" r="11" fill="#ffffff"/>
+</svg>

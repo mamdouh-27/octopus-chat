@@ -1,0 +1,883 @@
+/* Transcript, composer, tool cards, diffs, code blocks. */
+
+.oc-chat {
+  display: flex;
+  flex-direction: column;
+  /* `flex: 1 1 0` rather than `auto`: with an `auto` basis the transcript is
+     sized from its content and refuses to shrink, which pushes the composer
+     off the bottom of the window. A zero basis plus `min-height: 0` lets the
+     transcript absorb the slack and guarantees the composer keeps its height. */
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--oc-bg);
+}
+
+.oc-transcript {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 0 8px;
+}
+.oc-thread {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Empty chat: the transcript is out of the way and the dock is centred in the
+   pane, so the composer sits in the middle of the window rather than on the
+   floor of it. */
+.oc-chat[data-empty="true"] {
+  justify-content: center;
+}
+.oc-chat[data-empty="true"] .oc-transcript {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- message */
+
+.oc-msg {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+}
+.oc-msg + .oc-msg {
+  border-top: 1px solid var(--oc-border-subtle);
+}
+.oc-msg-avatar {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-size: 0.68em;
+  font-weight: 700;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-elevated);
+  color: var(--oc-text-muted);
+}
+
+/* The assistant reads left to right. The user's own words are mirrored to the
+   right so a transcript scans as a dialogue: agent on the left, you on the
+   right. `row-reverse` puts the avatar after the bubble rather than before it,
+   which is what makes the swap read correctly without duplicating markup. */
+.oc-msg[data-role="user"] {
+  flex-direction: row-reverse;
+}
+.oc-msg[data-role="user"] .oc-msg-avatar {
+  background: var(--oc-bg-selected);
+  border-color: var(--oc-border-strong);
+  color: var(--oc-primary);
+}
+/* A user turn is a short utterance, not prose, so it is capped and pushed to
+   the right edge instead of stretching the full column width. */
+.oc-msg[data-role="user"] .oc-msg-body {
+  flex: 0 1 auto;
+  max-width: min(560px, 76%);
+}
+.oc-msg[data-role="user"] .oc-msg-meta,
+.oc-msg[data-role="user"] .oc-msg-actions {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+.oc-msg-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.oc-msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 0.79em;
+  color: var(--oc-text-faint);
+}
+.oc-msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.oc-msg:hover .oc-msg-actions,
+.oc-msg:focus-within .oc-msg-actions {
+  opacity: 1;
+}
+
+.oc-user-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: var(--oc-bg-elevated);
+  border: 1px solid var(--oc-border);
+  /* Direction comes from the text itself (`dir="auto"` on the element), so a
+     right-to-left reply is not left stranded against the mirrored bubble. */
+  text-align: start;
+}
+
+/* Inline code is source, not prose: it stays left to right even inside an RTL
+   paragraph, otherwise brackets and operators reorder into nonsense. */
+.oc-inline-code {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+}
+
+.oc-attachments,
+.oc-attach-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+/* Inside the composer border the strip hugs the text area, so it needs its own
+   inset rather than the transcript's outer margin. */
+.oc-attach-strip {
+  padding: 11px 12px 0;
+}
+.oc-attachments {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+.oc-attachment,
+.oc-attach-chip {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-elevated);
+}
+.oc-attach-chip img,
+.oc-attachment img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* The thumbnail is not interactive: the button layered over it is what
+     receives the click. Without this the image paints above the absolutely
+     positioned overlay, because it comes later in the DOM. */
+  pointer-events: none;
+}
+.oc-attachment {
+  cursor: zoom-in;
+  /* A bare reset: this is a `<button>`, so it must not inherit the UA's
+     button chrome or the shared `.oc-btn` sizing. */
+  border: none;
+  padding: 0;
+  background: none;
+  display: block;
+}
+.oc-attach-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  cursor: zoom-in;
+  border: none;
+  padding: 0;
+  background: none;
+}
+/* The remove control has to sit above the zoom overlay, which covers the whole
+   chip. */
+.oc-attach-chip > button:not(.oc-attach-open) {
+  z-index: 2;
+}
+.oc-attach-chip button {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 5px;
+  background: rgb(0 0 0 / 0.65);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------- markdown */
+
+.oc-md > *:first-child { margin-top: 0; }
+.oc-md > *:last-child { margin-bottom: 0; }
+/* `dir="auto"` is on the container; this keeps quotes, lists and table cells
+   aligned to the start of their own line so an RTL paragraph reads correctly. */
+.oc-md blockquote,
+.oc-md li { text-align: start; }
+.oc-md p { margin: 0 0 0.85em; }
+.oc-md h1, .oc-md h2, .oc-md h3, .oc-md h4 {
+  margin: 1.4em 0 0.6em;
+  color: var(--oc-markdown-heading);
+}
+.oc-md h1 { font-size: 1.32em; }
+.oc-md h2 {
+  font-size: 1.18em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-md h3 { font-size: 1.05em; }
+.oc-md h4 { font-size: 0.97em; }
+.oc-md ul, .oc-md ol {
+  margin: 0 0 0.85em;
+  padding-left: 1.5em;
+}
+.oc-md li { margin: 0.24em 0; }
+.oc-md li::marker { color: var(--oc-markdown-list); }
+.oc-md blockquote {
+  margin: 0 0 0.85em;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 3px solid var(--oc-border-strong);
+  color: var(--oc-markdown-quote);
+}
+.oc-md hr {
+  margin: 1.5em 0;
+  border: none;
+  border-top: 1px solid var(--oc-markdown-rule);
+}
+.oc-md code {
+  font-family: var(--oc-font-code);
+  font-size: 0.885em;
+  padding: 0.14em 0.36em;
+  border-radius: 5px;
+  background: var(--oc-markdown-code-bg);
+  color: var(--oc-markdown-code);
+}
+.oc-md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 0.85em;
+  font-size: 0.94em;
+}
+.oc-md th, .oc-md td {
+  padding: 6px 10px;
+  border: 1px solid var(--oc-border);
+  text-align: left;
+}
+.oc-md th {
+  background: var(--oc-bg-elevated);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------- code block */
+
+.oc-code {
+  position: relative;
+  margin: 0 0 0.85em;
+  border-radius: 9px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-input);
+  overflow: hidden;
+}
+.oc-code-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px 5px 11px;
+  font-size: 0.76em;
+  color: var(--oc-text-faint);
+  background: var(--oc-bg-panel);
+  border-bottom: 1px solid var(--oc-border);
+  font-family: var(--oc-font-code);
+}
+.oc-code pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+  font-family: var(--oc-font-code);
+  font-size: 0.86em;
+  line-height: 1.6;
+  tab-size: 2;
+}
+.oc-code pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: var(--oc-text);
+}
+.oc-code-actions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.oc-code:hover .oc-code-actions { opacity: 1; }
+
+/* ------------------------------------------------------------ tool calls */
+
+.oc-tools {
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.oc-tool {
+  border: 1px solid var(--oc-border);
+  border-radius: 9px;
+  background: var(--oc-bg-panel);
+  overflow: hidden;
+}
+.oc-tool-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.87em;
+}
+.oc-tool-head:hover { background: var(--oc-bg-hover); }
+.oc-tool-summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oc-tool[data-state="error"] { border-color: var(--oc-danger); }
+.oc-tool[data-state="denied"] { border-color: var(--oc-warning); }
+.oc-tool-body {
+  padding: 9px 11px;
+  border-top: 1px solid var(--oc-border);
+  font-family: var(--oc-font-code);
+  font-size: 0.82em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 340px;
+  overflow: auto;
+  color: var(--oc-text-muted);
+  background: var(--oc-bg-input);
+}
+
+/* ------------------------------------------------------------------- diff */
+
+.oc-diff {
+  font-family: var(--oc-font-code);
+  font-size: 0.82em;
+  line-height: 1.5;
+  overflow-x: auto;
+  border-top: 1px solid var(--oc-border);
+}
+.oc-diff-hunk {
+  padding: 3px 11px;
+  color: var(--oc-diff-hunk);
+  background: var(--oc-bg-elevated);
+}
+.oc-diff-line {
+  display: flex;
+  white-space: pre;
+}
+.oc-diff-num {
+  flex: 0 0 auto;
+  width: 42px;
+  padding-right: 10px;
+  text-align: right;
+  color: var(--oc-diff-context);
+  user-select: none;
+}
+.oc-diff-text {
+  flex: 1 1 auto;
+  padding-right: 12px;
+}
+.oc-diff-line[data-sign="+"] {
+  background: var(--oc-diff-added-bg);
+  color: var(--oc-diff-added);
+}
+.oc-diff-line[data-sign="-"] {
+  background: var(--oc-diff-removed-bg);
+  color: var(--oc-diff-removed);
+}
+.oc-diff-line[data-sign=" "] { color: var(--oc-diff-context); }
+
+/* --------------------------------------------------------------- approval */
+
+.oc-approval {
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--oc-warning);
+  background: var(--oc-bg-elevated);
+  margin-bottom: 8px;
+}
+.oc-approval-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.88em;
+  font-weight: 600;
+  color: var(--oc-warning);
+  margin-bottom: 6px;
+}
+.oc-approval-args {
+  font-family: var(--oc-font-code);
+  font-size: 0.82em;
+  color: var(--oc-text-muted);
+  background: var(--oc-bg-input);
+  border: 1px solid var(--oc-border);
+  border-radius: 7px;
+  padding: 7px 9px;
+  margin-bottom: 9px;
+  max-height: 160px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.oc-approval-actions { display: flex; gap: 7px; }
+
+/* ------------------------------------------------------------ todo widget */
+
+.oc-todos {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-panel);
+}
+.oc-todo {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 0.89em;
+  color: var(--oc-text-muted);
+}
+.oc-todo[data-status="done"] {
+  color: var(--oc-text-faint);
+  text-decoration: line-through;
+}
+.oc-todo-mark {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  border-radius: 4px;
+  border: 1px solid var(--oc-border-strong);
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  color: var(--oc-bg);
+}
+.oc-todo[data-status="done"] .oc-todo-mark {
+  background: var(--oc-success);
+  border-color: var(--oc-success);
+}
+.oc-todo[data-status="active"] .oc-todo-mark {
+  border-color: var(--oc-primary);
+  background: var(--oc-bg-selected);
+}
+
+/* -------------------------------------------------------------- reasoning */
+
+.oc-reasoning {
+  margin-bottom: 8px;
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: var(--oc-bg-panel);
+  overflow: hidden;
+}
+.oc-reasoning-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  color: var(--oc-text-faint);
+  font-size: 0.8em;
+  cursor: pointer;
+}
+.oc-reasoning-body {
+  padding: 4px 11px 10px;
+  font-size: 0.86em;
+  line-height: 1.6;
+  color: var(--oc-text-faint);
+  white-space: pre-wrap;
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------- composer */
+
+.oc-composer-dock {
+  flex: 0 0 auto;
+  padding: 0 24px 14px;
+  background: var(--oc-bg);
+}
+.oc-composer-inner {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* --------------------------------------------------------- centred stage */
+
+/* Context selector that sits directly above the composer on an empty chat. */
+.oc-stage-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 10px;
+  width: 100%;
+  max-width: 780px;
+  padding-left: 2px;
+}
+.oc-stage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 260px;
+  padding: 5px 9px;
+  border: 1px solid var(--oc-border);
+  border-radius: 8px;
+  background: var(--oc-bg-input);
+  color: var(--oc-text-muted);
+  font: inherit;
+  font-size: 0.88em;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.oc-stage-chip:hover:not([data-static="true"]) {
+  background: var(--oc-bg-hover);
+  border-color: var(--oc-border-strong);
+  color: var(--oc-text);
+}
+.oc-stage-chip svg {
+  flex: 0 0 auto;
+  color: var(--oc-text-faint);
+}
+.oc-stage-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--oc-border);
+}
+
+/* Starter prompts under the composer. */
+.oc-stage-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 12px;
+}
+.oc-stage-pill {
+  padding: 6px 12px;
+  border: 1px solid var(--oc-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+.oc-stage-pill:hover {
+  background: var(--oc-bg-hover);
+  border-color: var(--oc-border-strong);
+  color: var(--oc-text);
+}
+
+.oc-composer {
+  border: 1px solid var(--oc-border-strong);
+  border-radius: 14px;
+  background: var(--oc-bg-elevated);
+  box-shadow: 0 4px 20px -12px rgb(0 0 0 / 0.5);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.oc-composer:focus-within {
+  border-color: var(--oc-border-focus);
+  box-shadow: 0 0 0 3px var(--oc-primarySoft);
+}
+.oc-composer-input {
+  width: 100%;
+  max-height: 280px;
+  padding: 13px 15px 4px;
+  /* The composer grows with its content, so a visible scrollbar here would be
+     a permanent artefact on an empty box. */
+  scrollbar-width: none;
+  border: none;
+  background: transparent;
+  color: var(--oc-text);
+  font: inherit;
+  resize: none;
+  outline: none;
+  user-select: text;
+}
+/* With thumbnails already occupying the top of the box, the text no longer needs
+   the full inset or the gap reads as a seam. */
+.oc-attach-strip + .oc-composer-input {
+  padding-top: 8px;
+}
+.oc-composer-input::-webkit-scrollbar {
+  display: none;
+}
+.oc-composer-input::placeholder {
+  color: var(--oc-text-faint);
+}
+
+.oc-composer-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px 7px;
+}
+.oc-composer-bar .oc-spacer { flex: 1 1 auto; }
+
+.oc-composer-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-composer-btn:hover:not(:disabled) {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-composer-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+/* A toggle that is currently overriding the automatic behaviour, e.g. the text
+   direction button set to something other than "auto". */
+.oc-composer-btn[data-active="true"] {
+  background: var(--oc-primarySoft);
+  color: var(--oc-primary);
+}
+/* Active dictation. The pulsing dot is the only cue, since there is no
+   waveform to draw without an audio stream we control. */
+.oc-composer-btn[data-listening="true"] {
+  color: var(--oc-danger);
+  background: var(--oc-bg-hover);
+  animation: oc-mic-pulse 1.3s ease-in-out infinite;
+}
+@keyframes oc-mic-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.oc-composer-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 220px;
+  padding: 4px 7px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  font-size: 0.87em;
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-composer-select:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+/* The effort chip stays visible for models that cannot reason, so its position
+   never moves and the reason is stated on hover. */
+.oc-composer-select[data-unsupported="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.oc-composer-select[data-unsupported="true"]:hover {
+  background: transparent;
+  color: var(--oc-text-muted);
+}
+
+.oc-send {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 8px;
+  background: var(--oc-text);
+  color: var(--oc-bg);
+  cursor: pointer;
+  transition: opacity 110ms ease, background 110ms ease;
+}
+.oc-send:hover:not(:disabled) { background: var(--oc-primary); color: #fff; }
+.oc-send:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.oc-queued {
+  margin-bottom: 7px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--oc-border-strong);
+  background: var(--oc-bg-panel);
+  font-size: 0.86em;
+  color: var(--oc-text-muted);
+}
+.oc-queued-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+/* ------------------------------------------------------------ popover menus */
+
+/* Positioned by `Popover`, which measures the anchor after mount and clamps the
+   panel to the window. The properties here are only the pre-measurement state. */
+.oc-popmenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 70;
+  min-width: 230px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--oc-border-strong);
+  background: var(--oc-bg-overlay);
+  box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.5);
+  animation: oc-pop 110ms cubic-bezier(0.2, 0, 1, 1);
+}
+.oc-popmenu-wide {
+  min-width: 340px;
+}
+.oc-popmenu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 9px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text);
+  font-size: 0.88em;
+  text-align: left;
+  cursor: pointer;
+}
+.oc-popmenu-item:hover { background: var(--oc-bg-hover); }
+
+/* Filter field, pinned to the very top of the model popover so it is the first
+   thing under the cursor when the menu opens. */
+.oc-model-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  margin: 1px 3px 5px;
+  padding: 0 8px;
+  border: 1px solid var(--oc-border);
+  border-radius: 7px;
+  background: var(--oc-bg-input);
+  color: var(--oc-text-muted);
+}
+.oc-model-search:focus-within {
+  border-color: var(--oc-border-focus);
+  box-shadow: 0 0 0 2px var(--oc-primarySoft);
+}
+.oc-model-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--oc-text);
+  font: inherit;
+  font-size: 0.88em;
+}
+.oc-model-search input::placeholder {
+  color: var(--oc-text-faint);
+}
+.oc-model-search-clear {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--oc-text-faint);
+  cursor: pointer;
+}
+.oc-model-search-clear:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+
+.oc-model-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 2px;
+  /* Bounded here rather than only by the popover's measured `max-height`: a
+     provider can serve thirty models, and an uncapped list makes the panel tall
+     enough that placing it against the composer pushes it off the top. Capping
+     the scroll region keeps the panel a predictable size, so the flip decision
+     has something sensible to work with. */
+  max-height: min(52vh, 460px);
+}
+.oc-model-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px 3px;
+  font-size: 0.78em;
+  font-weight: 600;
+  color: var(--oc-text-faint);
+  position: sticky;
+  top: 0;
+  background: var(--oc-bg-overlay);
+}
+.oc-model-empty {
+  padding: 2px 9px 4px;
+  font-size: 0.8em;
+  color: var(--oc-text-faint);
+}
+.oc-model-probe {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--oc-text-faint);
+  cursor: pointer;
+}
+.oc-model-probe:hover { background: var(--oc-bg-hover); color: var(--oc-text); }
+
+/* ------------------------------------------------------------------ caret */
+
+.oc-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1.05em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--oc-primary);
+  animation: oc-blink 1.05s steps(2, start) infinite;
+}
+@keyframes oc-blink {
+  50% { opacity: 0; }
+}

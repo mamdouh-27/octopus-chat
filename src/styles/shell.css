@@ -1,0 +1,735 @@
+/* App shell: menu bar, title bar, sidebar, resizable panes. */
+
+.oc-app {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--oc-bg);
+}
+
+.oc-surface {
+  background: var(--oc-bg);
+}
+
+/* --------------------------------------------------------------- menu bar */
+
+/* Cursor-style application menu. This is the only always-visible home for
+   Settings and the command palette, which is why those two commands are
+   reachable without a keyboard shortcut. */
+.oc-menubar {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  height: 30px;
+  padding: 0 8px;
+  background: var(--oc-bg-panel);
+  border-bottom: 1px solid var(--oc-border);
+  -webkit-app-region: drag;
+  flex: 0 0 auto;
+}
+.oc-menubar-item {
+  padding: 3px 9px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  font: inherit;
+  font-size: 0.88em;
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-menubar-item:hover,
+.oc-menubar-item[data-open="true"] {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-menubar-item[data-open="true"] {
+  background: var(--oc-bg-selected);
+}
+.oc-menubar .oc-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* ------------------------------------------------------------- title bar */
+
+.oc-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 0 0 4px;
+  background: var(--oc-bg-panel);
+  border-bottom: 1px solid var(--oc-border);
+  -webkit-app-region: drag;
+  flex: 0 0 auto;
+}
+.oc-titlebar button,
+.oc-titlebar select,
+.oc-titlebar input,
+.oc-titlebar .oc-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.oc-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 4px;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 0.9em;
+  letter-spacing: -0.01em;
+  color: var(--oc-text);
+}
+.oc-brand-sub {
+  color: var(--oc-text-faint);
+  font-weight: 450;
+  font-size: 0.86em;
+  max-width: 34ch;
+}
+
+/* One toggle style for both panes, so the sidebar and panel controls read as
+   the same control pointing in opposite directions. */
+.oc-pane-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-pane-toggle:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+
+/* Native frame controls, since the window is undecorated. */
+.oc-window-buttons {
+  display: flex;
+  margin-left: 6px;
+}
+.oc-window-buttons button {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-window-buttons button:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-window-buttons .oc-win-close:hover {
+  background: var(--oc-danger);
+  color: #fff;
+}
+
+/* --------------------------------------------------------------- main grid */
+
+.oc-main {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- sidebar */
+
+.oc-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 0 0 auto;
+  background: var(--oc-bg-panel);
+  border-right: 1px solid var(--oc-border);
+  overflow: hidden;
+}
+
+/* Project picker and the new-project action share one button, so the control
+   and what it acts on are never separated. */
+.oc-project-frame {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: calc(100% - 16px);
+  margin: 2px 8px 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.oc-project-frame:hover .oc-project-bar,
+.oc-project-frame:hover .oc-project-add {
+  border-color: var(--oc-border-strong);
+}
+.oc-project-frame:hover .oc-project-add {
+  background: var(--oc-primary);
+  border-color: var(--oc-primary);
+  color: #fff;
+}
+.oc-project-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 7px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-input);
+  color: var(--oc-text);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9em;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.oc-project-bar:hover {
+  background: var(--oc-bg-hover);
+  border-color: var(--oc-border-strong);
+}
+.oc-project-icon {
+  flex: 0 0 auto;
+  color: var(--oc-text-faint);
+}
+.oc-project-add {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 7px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-input);
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+.oc-project-add:hover {
+  background: var(--oc-primary);
+  border-color: var(--oc-primary);
+  color: #fff;
+}
+
+.oc-project-roots {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 12px 4px;
+  font-size: 0.72em;
+}
+
+.oc-session-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 4px 8px 10px;
+}
+
+.oc-session-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  margin-bottom: 1px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.92em;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-session-item:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-session-item[data-active="true"] {
+  background: var(--oc-bg-selected);
+  border-color: var(--oc-border-strong);
+  color: var(--oc-text);
+  font-weight: 500;
+}
+.oc-session-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oc-session-fav {
+  color: var(--oc-warning);
+  flex: 0 0 auto;
+}
+
+.oc-run-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: var(--oc-primary);
+  animation: oc-pulse 1.4s ease-in-out infinite;
+}
+@keyframes oc-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.oc-sidebar-foot {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--oc-border);
+}
+
+/* Full-width primary action at the top of the sidebar, above the project
+   picker: starting a chat is the most frequent action and should not be
+   anchored to the bottom of the pane. */
+.oc-new-chat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 16px);
+  margin: 8px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--oc-text);
+  font: inherit;
+  font-size: 0.92em;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-new-chat:hover {
+  background: var(--oc-bg-hover);
+}
+.oc-new-chat svg {
+  color: var(--oc-text-faint);
+  flex: 0 0 auto;
+}
+
+/* Rows that are navigational rather than textual, e.g. Search / Settings. */
+.oc-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  font: inherit;
+  font-size: 0.9em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-nav-row:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-nav-row svg {
+  flex: 0 0 auto;
+  color: var(--oc-text-faint);
+}
+.oc-nav-row .oc-spacer {
+  flex: 1 1 auto;
+}
+/* Inside the footer the rows share the width with the collapse toggle instead of
+   each claiming a full line. */
+.oc-sidebar-foot .oc-nav-row {
+  flex: 1 1 auto;
+  width: auto;
+  padding: 5px 8px;
+  font-size: 0.86em;
+}
+
+/* Small section label inside the sidebar, e.g. "Repositories". */
+.oc-side-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 12px 5px;
+  font-size: 0.76em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--oc-text-faint);
+}
+.oc-side-label .oc-spacer {
+  flex: 1 1 auto;
+}
+.oc-side-label button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--oc-text-faint);
+  cursor: pointer;
+}
+.oc-side-label button:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+
+/* Project rows in the repository list. */
+.oc-repo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  font: inherit;
+  font-size: 0.9em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-repo:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-repo[data-active="true"] {
+  background: var(--oc-bg-selected);
+  border-color: var(--oc-border-strong);
+  color: var(--oc-text);
+}
+.oc-repo svg {
+  flex: 0 0 auto;
+  color: var(--oc-text-faint);
+}
+.oc-repo-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Menu bar dropdown anchoring. The Menu component measures itself and then
+   positions itself, so the button only has to mark itself as open. */
+.oc-menubar-host {
+  position: relative;
+  display: flex;
+}
+.oc-menubar-version {
+  padding-right: 2px;
+  font-size: 0.78em;
+  color: var(--oc-text-faint);
+  -webkit-app-region: no-drag;
+}
+
+/* Project rows in the repository list. */
+.oc-repo-list {
+  flex: 0 0 auto;
+  max-height: 32%;
+  overflow-y: auto;
+  padding-bottom: 2px;
+}
+.oc-repo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: calc(100% - 16px);
+  margin: 0 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text-muted);
+  font: inherit;
+  font-size: 0.9em;
+  text-align: left;
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-repo:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-repo[data-active="true"] {
+  background: var(--oc-bg-selected);
+  border-color: var(--oc-border-strong);
+  color: var(--oc-text);
+}
+.oc-repo svg {
+  flex: 0 0 auto;
+  color: var(--oc-text-faint);
+}
+.oc-repo-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Placeholder text for an empty list inside the sidebar. */
+.oc-side-empty {
+  padding: 6px 12px 8px;
+  font-size: 0.84em;
+  color: var(--oc-text-faint);
+}
+
+/* --------------------------------------------------------------- resizer */
+
+.oc-resizer {
+  flex: 0 0 auto;
+  width: 5px;
+  margin: 0 -2px;
+  cursor: col-resize;
+  position: relative;
+  z-index: 5;
+}
+.oc-resizer::after {
+  content: "";
+  position: absolute;
+  inset: 0 2px;
+  background: transparent;
+  transition: background 140ms ease;
+}
+.oc-resizer:hover::after,
+.oc-resizer[data-dragging="true"]::after {
+  background: var(--oc-primary);
+}
+
+/* ------------------------------------------------------------ right panel */
+
+.oc-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 0 0 auto;
+  background: var(--oc-bg-panel);
+  border-left: 1px solid var(--oc-border);
+  overflow: hidden;
+}
+.oc-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-panel-tab {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--oc-text-faint);
+  cursor: pointer;
+  transition: background 110ms ease, color 110ms ease;
+}
+.oc-panel-tab:hover:not(:disabled) {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-panel-tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.oc-panel-tab[data-active="true"] {
+  background: var(--oc-bg-selected);
+  color: var(--oc-primary);
+}
+.oc-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.oc-panel-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px;
+  color: var(--oc-text-faint);
+  font-size: 0.88em;
+}
+.oc-panel-sub {
+  padding: 7px 11px;
+  font-size: 0.78em;
+  color: var(--oc-text-faint);
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-panel-error {
+  padding: 10px 12px;
+  color: var(--oc-danger);
+  font-size: 0.85em;
+}
+
+/* file tree */
+.oc-split {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.oc-tree {
+  flex: 0 0 auto;
+  max-height: 46%;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 8px;
+  border: none;
+  background: transparent;
+  color: var(--oc-text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.85em;
+}
+.oc-tree-row:hover {
+  background: var(--oc-bg-hover);
+  color: var(--oc-text);
+}
+.oc-tree-row[data-active="true"] {
+  background: var(--oc-bg-selected);
+  color: var(--oc-text);
+}
+.oc-tree-caret {
+  flex: 0 0 auto;
+  color: var(--oc-text-faint);
+}
+.oc-fileview {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px;
+}
+.oc-fileview-head {
+  padding: 3px 4px 7px;
+  font-size: 0.76em;
+  font-family: var(--oc-font-code);
+  color: var(--oc-text-faint);
+}
+
+/* changes */
+.oc-changelist {
+  max-height: 40%;
+  flex: 0 0 auto;
+}
+.oc-changerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 11px;
+  font-size: 0.82em;
+  color: var(--oc-text-muted);
+}
+.oc-change-code {
+  flex: 0 0 auto;
+  min-width: 22px;
+  font-family: var(--oc-font-code);
+  font-size: 0.9em;
+  color: var(--oc-text-faint);
+}
+.oc-change-code[data-staged] {
+  color: var(--oc-success);
+}
+
+/* editor */
+.oc-editor-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-editor-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  font-size: 0.75em;
+  font-family: var(--oc-font-code);
+  color: var(--oc-text-faint);
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-editor-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 12px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: var(--oc-bg-input);
+  color: var(--oc-text);
+  font-family: var(--oc-font-code);
+  font-size: 0.84em;
+  line-height: 1.6;
+  tab-size: 2;
+}
+.oc-preview {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: none;
+  background: #fff;
+}
+
+/* ---------------------------------------------------------------- toasts */
+
+.oc-toasts {
+  position: fixed;
+  right: 16px;
+  bottom: 36px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+}
+.oc-toast {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--oc-border-strong);
+  background: var(--oc-bg-overlay);
+  box-shadow: 0 10px 26px -10px rgb(0 0 0 / 0.5);
+  font-size: 0.9em;
+}
+.oc-toast-icon {
+  display: flex;
+  flex: 0 0 auto;
+}
+.oc-toast button {
+  border: none;
+  background: none;
+  color: var(--oc-text-faint);
+  cursor: pointer;
+  padding: 0;
+}

@@ -1,0 +1,7 @@
+{
+  "//": "OPTIONAL machine-specific build locations. Only needed when the default toolchain layout does not work (e.g. the system drive is full). Delete this file on a machine with a normal system drive: scripts/run.mjs and env.ps1 fall back to the unmodified process environment. All fields below are OPTIONAL.",
+  "buildRoot": "D:\\octopus-chat-build",
+  "linker": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+  "extraPath": ["C:\\msys64\\ucrt64\\bin"],
+  "buildJobs": "2"
+}

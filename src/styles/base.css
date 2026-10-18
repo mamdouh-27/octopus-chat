@@ -1,0 +1,190 @@
+/*
+ * Octopus Chat base styles.
+ *
+ * Every colour is a theme token, so this file never names a colour directly.
+ * Layout and component rules live in the sibling sheets.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--oc-font-ui);
+  font-size: calc(var(--oc-font-size) * 1px);
+  line-height: var(--oc-line-height);
+  color: var(--oc-text);
+  background: var(--oc-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  /* The window is a fixed tool surface, not a document: no rubber banding. */
+  overscroll-behavior: none;
+  user-select: none;
+}
+
+/* Text the user actually needs to copy opts back in. */
+p,
+li,
+td,
+th,
+pre,
+code,
+textarea,
+input,
+[data-selectable="true"] {
+  user-select: text;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--oc-text);
+  letter-spacing: -0.011em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--oc-markdown-link);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--oc-primary) 32%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--oc-border-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------- scrollbars */
+
+.oc-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--oc-border-strong) transparent;
+}
+.oc-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.oc-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.oc-scroll::-webkit-scrollbar-thumb {
+  background: var(--oc-border-strong);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.oc-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--oc-text-faint);
+  background-clip: content-box;
+}
+.oc-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ------------------------------------------------------------------ utility */
+
+.oc-row {
+  display: flex;
+  align-items: center;
+}
+.oc-col {
+  display: flex;
+  flex-direction: column;
+}
+.oc-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.oc-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oc-muted {
+  color: var(--oc-text-muted);
+}
+.oc-faint {
+  color: var(--oc-text-faint);
+}
+.oc-mono {
+  font-family: var(--oc-font-code);
+  font-variant-ligatures: none;
+}
+.oc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Keyboard hints rendered inline in menus and the composer. */
+kbd {
+  font-family: var(--oc-font-code);
+  font-size: 0.78em;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 5px;
+  color: var(--oc-text-muted);
+  background: var(--oc-bg-elevated);
+  border: 1px solid var(--oc-border);
+  border-bottom-width: 2px;
+  white-space: nowrap;
+}
+
+/* Plan mode tints the entire shell so the mode is impossible to miss. */
+body[data-session-mode="plan"] .oc-surface {
+  background-image: linear-gradient(var(--oc-plan-tint), var(--oc-plan-tint));
+}
+body[data-session-mode="plan"] .oc-mode-badge {
+  color: var(--oc-primary);
+  border-color: color-mix(in oklch, var(--oc-primary) 45%, transparent);
+  background: color-mix(in oklch, var(--oc-primary) 14%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body[data-reduce-motion="true"] *,
+body[data-reduce-motion="true"] *::before,
+body[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+}

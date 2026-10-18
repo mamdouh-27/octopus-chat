@@ -1,0 +1,456 @@
+/* Buttons, inputs, menus, dialogs, badges, switches. */
+
+.oc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 7px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-elevated);
+  color: var(--oc-text);
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+.oc-btn:hover:not(:disabled) {
+  background: var(--oc-bg-hover);
+  border-color: var(--oc-border-strong);
+}
+.oc-btn:active:not(:disabled) {
+  background: var(--oc-bg-active);
+}
+.oc-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.oc-btn[data-variant="primary"] {
+  background: var(--oc-primary);
+  border-color: var(--oc-primary);
+  color: #fff;
+}
+.oc-btn[data-variant="primary"]:hover:not(:disabled) {
+  background: var(--oc-primary-hover);
+  border-color: var(--oc-primary-hover);
+}
+.oc-btn[data-variant="ghost"] {
+  background: transparent;
+  border-color: transparent;
+}
+.oc-btn[data-variant="ghost"]:hover:not(:disabled) {
+  background: var(--oc-bg-hover);
+}
+.oc-btn[data-variant="danger"] {
+  background: transparent;
+  border-color: color-mix(in oklch, var(--oc-danger) 40%, transparent);
+  color: var(--oc-danger);
+}
+.oc-btn[data-variant="danger"]:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--oc-danger) 12%, transparent);
+}
+.oc-btn[data-size="sm"] {
+  padding: 3px 8px;
+  font-size: 0.84em;
+}
+.oc-btn[data-size="icon"] {
+  padding: 5px;
+  width: 28px;
+  height: 28px;
+}
+
+/* ---------------------------------------------------------------- inputs */
+
+.oc-input,
+.oc-select,
+.oc-textarea {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-input);
+  color: var(--oc-text);
+  font: inherit;
+  font-size: 0.92em;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.oc-input:focus,
+.oc-select:focus,
+.oc-textarea:focus {
+  outline: none;
+  border-color: var(--oc-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--oc-primary) 18%, transparent);
+}
+.oc-input::placeholder,
+.oc-textarea::placeholder {
+  color: var(--oc-text-faint);
+}
+.oc-textarea {
+  resize: vertical;
+  min-height: 76px;
+  font-family: var(--oc-font-code);
+  font-size: 0.9em;
+  line-height: 1.55;
+}
+.oc-select {
+  appearance: none;
+  padding-right: 28px;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 15px) 52%, calc(100% - 10px) 52%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.oc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.oc-field-label {
+  font-size: 0.84em;
+  font-weight: 600;
+  color: var(--oc-text-muted);
+}
+.oc-field-hint {
+  font-size: 0.8em;
+  color: var(--oc-text-faint);
+  line-height: 1.5;
+}
+.oc-field-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ---------------------------------------------------------------- switch */
+
+.oc-switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-elevated);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+.oc-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--oc-text-muted);
+  transition: transform 140ms cubic-bezier(0.2, 0, 0, 1), background 140ms ease;
+}
+.oc-switch[aria-checked="true"] {
+  background: var(--oc-primary);
+  border-color: var(--oc-primary);
+}
+.oc-switch[aria-checked="true"]::after {
+  transform: translateX(14px);
+  background: #fff;
+}
+
+/* ----------------------------------------------------------------- badge */
+
+.oc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78em;
+  font-weight: 550;
+  border: 1px solid var(--oc-border);
+  background: var(--oc-bg-elevated);
+  color: var(--oc-text-muted);
+  white-space: nowrap;
+}
+.oc-badge[data-tone="primary"] {
+  color: var(--oc-primary);
+  border-color: color-mix(in oklch, var(--oc-primary) 40%, transparent);
+  background: color-mix(in oklch, var(--oc-primary) 12%, transparent);
+}
+.oc-badge[data-tone="success"] {
+  color: var(--oc-success);
+  border-color: color-mix(in oklch, var(--oc-success) 40%, transparent);
+  background: color-mix(in oklch, var(--oc-success) 12%, transparent);
+}
+.oc-badge[data-tone="warn"] {
+  color: var(--oc-warning);
+  border-color: color-mix(in oklch, var(--oc-warning) 40%, transparent);
+  background: color-mix(in oklch, var(--oc-warning) 12%, transparent);
+}
+.oc-badge[data-tone="danger"] {
+  color: var(--oc-danger);
+  border-color: color-mix(in oklch, var(--oc-danger) 40%, transparent);
+  background: color-mix(in oklch, var(--oc-danger) 12%, transparent);
+}
+.oc-badge[data-tone="info"] {
+  color: var(--oc-info);
+  border-color: color-mix(in oklch, var(--oc-info) 40%, transparent);
+  background: color-mix(in oklch, var(--oc-info) 12%, transparent);
+}
+
+/* ------------------------------------------------------------------ menu */
+
+.oc-menu {
+  position: absolute;
+  z-index: 60;
+  min-width: 210px;
+  max-width: 380px;
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--oc-border-strong);
+  background: var(--oc-bg-overlay);
+  box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.45), 0 2px 8px -2px rgb(0 0 0 / 0.3);
+  animation: oc-pop 110ms cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes oc-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.oc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 9px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--oc-text);
+  font-size: 0.9em;
+  text-align: left;
+  cursor: pointer;
+}
+.oc-menu-item:hover,
+.oc-menu-item[data-active="true"] {
+  background: var(--oc-bg-hover);
+}
+.oc-menu-item[data-danger="true"] {
+  color: var(--oc-danger);
+}
+.oc-menu-sep {
+  height: 1px;
+  margin: 5px 4px;
+  background: var(--oc-border);
+}
+.oc-menu-label {
+  padding: 7px 9px 4px;
+  font-size: 0.74em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--oc-text-faint);
+}
+
+/* ---------------------------------------------------------------- dialog */
+
+.oc-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgb(0 0 0 / 0.5);
+  animation: oc-fade 130ms ease;
+}
+@keyframes oc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.oc-dialog {
+  width: 100%;
+  max-width: 620px;
+  max-height: min(78vh, 720px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 13px;
+  border: 1px solid var(--oc-border-strong);
+  background: var(--oc-bg-overlay);
+  box-shadow: 0 24px 64px -12px rgb(0 0 0 / 0.6);
+  animation: oc-rise 150ms cubic-bezier(0.2, 0, 0, 1);
+  overflow: hidden;
+}
+@keyframes oc-rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+.oc-dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--oc-border);
+}
+.oc-dialog-title {
+  font-size: 0.98em;
+  font-weight: 620;
+}
+.oc-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+}
+.oc-dialog-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--oc-border);
+}
+
+/* Errors raised inside a dialog stay in the dialog. A toast can expire or sit
+   behind the scrim, which is how a failed action used to look like a no-op. */
+.oc-inline-error {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--oc-danger);
+  border-radius: 8px;
+  background: var(--oc-bg-input);
+  color: var(--oc-danger);
+  font-size: 0.86em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------- lightbox */
+
+/* Deliberately not reusing the dialog scrim: the image should read against
+   black so a screenshot with a white background is not tinted by the theme. */
+.oc-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  background: rgb(0 0 0 / 0.9);
+}
+.oc-lightbox-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 0.86em;
+}
+.oc-lightbox-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px 60px 22px;
+}
+/* Constrained on both axes: `max-width: 100%` alone would let a tall image run
+   past the bottom of the window. */
+.oc-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+  box-shadow: 0 20px 60px -20px rgb(0 0 0 / 0.9);
+}
+.oc-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 56px;
+  border: none;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.oc-lightbox-nav:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+.oc-lightbox-nav[data-side="prev"] { left: 12px; }
+.oc-lightbox-nav[data-side="next"] { right: 12px; }
+.oc-lightbox-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.oc-lightbox-btn:hover {
+  background: rgb(255 255 255 / 0.15);
+}
+
+/* ------------------------------------------------------------ empty state */
+
+.oc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--oc-text-faint);
+}
+.oc-empty-title {
+  font-size: 1.02em;
+  font-weight: 600;
+  color: var(--oc-text-muted);
+}
+.oc-empty-hint {
+  font-size: 0.9em;
+  max-width: 46ch;
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------- spinner */
+
+.oc-spinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklch, currentColor 25%, transparent);
+  border-top-color: currentColor;
+  animation: oc-spin 620ms linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes oc-spin {
+  to { transform: rotate(360deg); }
+}
+/* ------------------------------------------------- provider action header */
+
+.oc-provider-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 13px;
+  margin-bottom: 16px;
+  border: 1px solid var(--oc-border);
+  border-radius: 10px;
+  background: var(--oc-bg-elevated);
+}
